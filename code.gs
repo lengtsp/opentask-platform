@@ -59,18 +59,6 @@ function getScriptURL() {
     return ScriptApp.getService().getUrl();
 }
 
-function doGet(e) {
-let page = (e.parameter.page) ? e.parameter.page.split('&')[0] : "";
-  if (page == 'aboutus') {
-    return HtmlService.createHtmlOutputFromFile('aboutus.html');
-  } else if (page === 'detail') {
-    return loadDetailPage(e.parameter.id, 'detail.html', 'task');
-  } else if (page === 'sub') {
-    return loadDetailPage(e.parameter.id, 'sub.html','sub');
-  }else {
-    return HtmlService.createHtmlOutputFromFile('index.html');
-  }
-}
 
 
 
@@ -102,7 +90,7 @@ function loadDetailPage(id, page,table) {
 
 
 
-//เลิกใช้แล้วเพราะไป merge column มาจากอีกตารางเพิ่ม
+//ร ร…ร”ยกรฃยชรฉรกร…รฉรร ยพรร’รรคยป merge column รร’ยจร’ยกรร•ยกยตร’รร’ยงร ยพร”รจร
 function getSheetData() {
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('task'); 
   var data = sheet.getDataRange().getValues();
@@ -137,14 +125,14 @@ function fetchMappedData() {
 
     var mainSpreadsheet = SpreadsheetApp.getActiveSpreadsheet();
     var taskSheet = mainSpreadsheet.getSheetByName('task');
-    var taskData = taskSheet.getDataRange().offset(1, 0).getValues();  // เริ่มจากแถวที่ 2 และคอลัมน์ A
+    var taskData = taskSheet.getDataRange().offset(1, 0).getValues();  // ร รร”รจรยจร’ยกรกยถรยทร•รจ 2 รกร…รยครร…ร‘รยนรฌ A
     
     var staffSpreadsheetId = "11fzyV3OJf4chznaW1fxh9f3-nNcGExhNdgDe-YI2FMg";
     var staffSheet = SpreadsheetApp.openById(staffSpreadsheetId).getSheetByName('staff');
-    var staffData = staffSheet.getDataRange().offset(1, 0).getValues(); // เริ่มจากแถวที่ 2 และคอลัมน์ A
+    var staffData = staffSheet.getDataRange().offset(1, 0).getValues(); // ร รร”รจรยจร’ยกรกยถรยทร•รจ 2 รกร…รยครร…ร‘รยนรฌ A
 
     var subSheet = mainSpreadsheet.getSheetByName('sub');
-    var subData = subSheet.getDataRange().offset(1, 0).getValues(); // เริ่มจากแถวที่ 2 และคอลัมน์ A
+    var subData = subSheet.getDataRange().offset(1, 0).getValues(); // ร รร”รจรยจร’ยกรกยถรยทร•รจ 2 รกร…รยครร…ร‘รยนรฌ A
 
     var mappedValue = getEmailMappedValue_sheetstaff();
     var allowedValuesSet = new Set(getSheetData_task_permission_getbyid(mappedValue));
@@ -163,11 +151,11 @@ function fetchMappedData() {
     Logger.log('xx1 : ' + getEmailMappedValue_sheetstaff_array(7))
 
 //-----------------------------------------------------------------------------
-    if (getEmailMappedValue_sheetstaff_array(7) === 'เห็น tasks เฉพาะของตัวเอง และกรณีเป็นผู้ขอใช้บริการ') {
-            Logger.log('เข้าเงื่อนไข 1')
+    if (getEmailMappedValue_sheetstaff_array(7) === 'ร รรงยน tasks ร ยฉยพร’รยขรยงยตร‘รร รยง รกร…รยกรยณร•ร ยปรงยนยผรรฉยขรรฃยชรฉยบรร”ยกร’ร') {
+            Logger.log('ร ยขรฉร’ร ยงร—รจรยนรคยข 1')
              filteredTaskData = taskData.filter(function(taskRow) {
                 
-            // Logger.log('เข้าเงื่อนไข 1-1 allowedValuesSet : ' + allowedValuesSet)
+            // Logger.log('ร ยขรฉร’ร ยงร—รจรยนรคยข 1-1 allowedValuesSet : ' + allowedValuesSet)
                 return taskRow[10] === mappedValue || 
                       taskRow[5] === mappedValue || 
                       taskRow[6] === mappedValue 
@@ -181,28 +169,28 @@ function fetchMappedData() {
             });
 
 
-    } else if (getEmailMappedValue_sheetstaff_array(7) === 'เห็น tasks ภายใต้ rc code ตนเองทั้งหมด') {
-            Logger.log('เห็น tasks ภายใต้ rc code ตนเองทั้งหมด')
-            //filter อะไรบ้าง
+    } else if (getEmailMappedValue_sheetstaff_array(7) === 'ร รรงยน tasks ร€ร’รรฃยตรฉ rc code ยตยนร รยงยทร‘รฉยงรรยด') {
+            Logger.log('ร รรงยน tasks ร€ร’รรฃยตรฉ rc code ยตยนร รยงยทร‘รฉยงรรยด')
+            //filter รรรครยบรฉร’ยง
              filteredTaskData = taskData.filter(function(taskRow) {
-                const mappedValue = getEmailMappedValue_sheetstaff_array(4); //function ที่เรียกมาจาก session email ลำดับ 2 คือ rc ลำดับสามคือ สายงาน
+                const mappedValue = getEmailMappedValue_sheetstaff_array(4); //function ยทร•รจร รร•รยกรร’ยจร’ยก session email ร…ร“ยดร‘ยบ 2 ยคร—ร rc ร…ร“ยดร‘ยบรร’รยคร—ร รร’รยงร’ยน
                 Logger.log('getEmailMappedValue_sheetstaff_array(4) : ' + getEmailMappedValue_sheetstaff_array(4))
                 var test_rc10 = getEmailMappedValue_sheetstaff_array_getdata_byemplid(taskRow[10])
                 var test_rc5 = getEmailMappedValue_sheetstaff_array_getdata_byemplid(taskRow[5])
                 var test_rc6 = getEmailMappedValue_sheetstaff_array_getdata_byemplid(taskRow[6])
 
 
-                //[2] มาจาก array ของ function
+                //[2] รร’ยจร’ยก array ยขรยง function
                 return test_rc10[2] === mappedValue || 
                        test_rc5[2] === mappedValue ||  
                        test_rc6[2] === mappedValue;    
             });
 
-    } else if (getEmailMappedValue_sheetstaff_array(7) === 'เห็น tasks ภายใต้สายงานเดียวกัน') {
-            Logger.log('เห็น tasks ภายใต้สายงานเดียวกัน')
+    } else if (getEmailMappedValue_sheetstaff_array(7) === 'ร รรงยน tasks ร€ร’รรฃยตรฉรร’รยงร’ยนร ยดร•รรยกร‘ยน') {
+            Logger.log('ร รรงยน tasks ร€ร’รรฃยตรฉรร’รยงร’ยนร ยดร•รรยกร‘ยน')
 
              filteredTaskData = taskData.filter(function(taskRow) {
-                const mappedValue = getEmailMappedValue_sheetstaff_array(5); //function ที่เรียกมาจาก session email ลำดับ 2 คือ rc ลำดับสามคือ สายงาน
+                const mappedValue = getEmailMappedValue_sheetstaff_array(5); //function ยทร•รจร รร•รยกรร’ยจร’ยก session email ร…ร“ยดร‘ยบ 2 ยคร—ร rc ร…ร“ยดร‘ยบรร’รยคร—ร รร’รยงร’ยน
                 // console.log('mappedValue')
                 // console.log(mappedValue)
 
@@ -211,7 +199,7 @@ function fetchMappedData() {
                 var test_rc6 = getEmailMappedValue_sheetstaff_array_getdata_byemplid(taskRow[6])
 
 
-                //[2] มาจาก array ของ function
+                //[2] รร’ยจร’ยก array ยขรยง function
                 return test_rc10[3] === mappedValue || 
                        test_rc5[3] === mappedValue ||  
                        test_rc6[3] === mappedValue;    
@@ -221,13 +209,13 @@ function fetchMappedData() {
 
 
 
-    } else if (getEmailMappedValue_sheetstaff_array(7) === 'เห็น tasks ทั้งหมด (admin)') {
+    } else if (getEmailMappedValue_sheetstaff_array(7) === 'ร รรงยน tasks ยทร‘รฉยงรรยด (admin)') {
 
-            Logger.log('เห็น tasks ทั้งหมด (admin)')
-            //filter อะไรบ้าง
-             filteredTaskData = taskData // กรณี ไม่ต้อง filter อะไรเลย
+            Logger.log('ร รรงยน tasks ยทร‘รฉยงรรยด (admin)')
+            //filter รรรครยบรฉร’ยง
+             filteredTaskData = taskData // ยกรยณร• รครรจยตรฉรยง filter รรรครร ร…ร
     } else {
-        return []; // ไม่มี tasks ที่ตรงกับเงื่อนไขใด ๆ
+        return []; // รครรจรร• tasks ยทร•รจยตรยงยกร‘ยบร ยงร—รจรยนรคยขรฃยด รฆ
     }
 
 //-----------------------------------------------------------------------------
@@ -276,7 +264,7 @@ return {
 
 
 
-// //เลิกใช้แล้วเพราะไป merge column มาจากอีกตารางเพิ่ม
+// //ร ร…ร”ยกรฃยชรฉรกร…รฉรร ยพรร’รรคยป merge column รร’ยจร’ยกรร•ยกยตร’รร’ยงร ยพร”รจร
 // function getSheetData_sub_datatable() {
 //   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('sub'); 
 //   var data = sheet.getDataRange().getValues();
