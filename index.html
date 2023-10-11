@@ -1,0 +1,1113 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+
+
+
+
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+
+
+<style>
+.toggle-arrow {
+    cursor: pointer;
+    transition: transform 0.3s;
+}
+
+.rotated {
+    transform: rotate(180deg);
+}
+</style>
+
+    <style>
+    .modal.is-fullscreen .modal-card {
+        width: 80vw;  /* Full viewport width */
+        height: 80vh; /* Full viewport height */
+        max-width: none;
+        overflow: auto; /* Allow scrolling if content is too long */
+    }
+    .modal.is-fullscreen .modal-card-head,
+    .modal.is-fullscreen .modal-card-foot {
+        left: 0;
+        right: 0;
+        width: 100%;
+    }
+
+    #dataTable {
+        width: 100% !important;
+        font-size: 14px;
+    }
+
+    small {
+              font-size: 12px;
+    }
+
+
+
+    .clickable-span {
+        cursor: pointer;
+    }
+
+    .clickable-span:hover {
+        background-color: #ffccff;  /* This is a light gray, but you can choose any color */
+    }
+
+    </style>
+
+    
+</head>
+
+<body>
+<div id="spinner" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);display:none;z-index:9999;">
+    <i class="fas fa-circle-notch fa-spin fa-3x"></i>
+</div>
+
+
+
+    <section class="section">
+        <!-- Data Table -->
+        <div class="container">
+            <h2 class="title">Open Tasks Platform</h2>
+                <p id="user-email-display"><b>Logged in as:</b> <span id="user-email"></span>
+                      <!-- แทรก icon ลูกศรชี้ลงและลูกศรชี้ขึ้น -->
+                      <i id="toggle-icon" class="fas fa-chevron-down"></i>
+                </p>
+                <div id="user-details"></div>
+                <style>
+                  #user-details {
+                      display: none; /* ซ่อน user-details ในตอนแรก */
+                      transition: max-height 0.5s ease-out; /* ให้การขยายและหดเป็นแบบเรียบร้อย */
+                      max-height: 0; /* กำหนดความสูงเริ่มต้น */
+                      overflow: hidden; /* ซ่อนส่วนที่เกินมา */
+                  }
+
+                  #toggle-icon {
+                      cursor: pointer; /* กำหนดให้แสดงเป็นรูปมือเมื่อชี้ที่ icon */
+                  }
+                </style>
+
+
+            <script>
+                  document.getElementById("toggle-icon").addEventListener("click", function() {
+                      var userDetails = document.getElementById("user-details");
+                      var icon = document.getElementById("toggle-icon");
+                      
+                      if (userDetails.style.display === "none") {
+                          userDetails.style.display = "block"; // แสดง user-details
+                          userDetails.style.maxHeight = "1000px"; // กำหนดความสูงสูงสุดเมื่อขยาย
+                          icon.classList.remove("fa-chevron-down");
+                          icon.classList.add("fa-chevron-up");
+                      } else {
+                          userDetails.style.display = "none"; // ซ่อน user-details
+                          userDetails.style.maxHeight = "0"; // กำหนดความสูงสูงสุดเมื่อหด
+                          icon.classList.remove("fa-chevron-up");
+                          icon.classList.add("fa-chevron-down");
+                      }
+                  });
+
+
+                  function displayUserDetails() {
+                    google.script.run.withSuccessHandler(function(userDetails) {
+                      document.getElementById("user-email").textContent = userDetails.email;
+                      if (userDetails.name) {
+                        var info = `
+                          <small><b>Name:</b> ${userDetails.name}</small><br>
+                          <small><b>Position:</b> ${userDetails.position}</small><br>
+                          <small><b>Department:</b> ${userDetails.department} (${userDetails.departmentCode})</small><br>
+                          <small><b>Work Line:</b> ${userDetails.workLine}</small>
+                        `;
+                        document.getElementById("user-details").innerHTML = info;
+                      }
+                    }).getUserDetails();
+                  }
+
+                  // window.onload = displayUserDetails;
+
+
+
+                  // const data_sub;
+                  window.onload = function() {
+                    displayUserDetails();
+                    
+                  };
+
+
+
+
+            </script>
+
+
+
+
+            <div class="tabs mt-3 "> <!-- tab bluema -->
+              <ul> <!-- tab bluema -->
+                <li class="is-active"><a href="#tab1">My Tasks</a></li>
+                <!-- <li><a href="#tab2">My Dashboard</a></li>
+                <li><a href="#tab3">My Alert</a></li>-->
+                <li><a href="#tab4">About me</a></li> 
+              </ul> <!-- tab bluema -->
+            </div> <!-- tab bluema -->
+
+
+
+            <!-- Content for tabs -->
+            <div id="tabContent"> <!-- tab bluema -->
+                <div id="tab1" class="tab-content">
+
+                        <small>แสดงผลสำหรับ คน created task, และเห็น task อื่นๆ ทั้งหมด (กรณีเป็น admin)<small><br>
+                        <button class="button is-primary is-small" onclick="openAddModal()"><i class="fa-solid fa-plus"></i>&nbsp;Add New Task</button>
+                        <br><br>
+                        <table id="dataTable" class="display mt-4">
+                            <thead>
+                                <tr>
+                                    <th>id</th>
+                                    <th>Task</th>
+                                    <th>detail</th>
+                                    <th>url1</th>
+                                    <th>url2</th>
+                                    <th>User</th>
+                                    <th>ผู้ขอใช้บริการ</th>
+                                    <th>Target Date</th>
+                                    <th>Created date</th>
+                                    <th>Last date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+              </div> <!-- tab bluema <div id="tab1" class="tab-content"> -->
+
+              <div id="tab2" class="tab-content">
+                  <!-- Content for Tab 2 --> 
+
+
+      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+
+
+
+
+
+<div class="container">
+    <h3 class="title">กราฟแสดง Status Tasks</h3>
+    
+    <div class="columns">
+        <div class="column is-4">
+            <canvas id="pieChart"></canvas>
+        </div>
+
+        <div class="column is-8">
+            <table class="table is-fullwidth" id="statusDataTable">
+                <thead>
+                    <tr>
+                        <th>Status</th>
+                        <th>Count</th>
+                        <th>Percentage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- ส่วนนี้จะถูกเติมโดย JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+
+<style>
+  /* #pieChart {
+    width: 50%; /* or other percentage */
+    height: auto;
+} */
+</style>
+
+
+
+
+<script>
+  google.script.run.withSuccessHandler(handleFetchedData).fetchMappedData();
+
+
+function handleFetchedData(data) {
+    const allStatuses = data.mappedData.map(row => row[11]);
+
+// 2. นับจำนวนแต่ละ Status
+const statusCounts = allStatuses.reduce((acc, status) => {
+    acc[status] = (acc[status] || 0) + 1;
+    return acc;
+}, {});
+
+// 3. คำนวณเปอร์เซ็นต์ของแต่ละ Status
+const total = allStatuses.length;
+const percentages = {};
+for (const status in statusCounts) {
+    percentages[status] = (statusCounts[status] / total) * 100;
+}
+
+// สร้าง Pie Chart
+const chartData = {
+    labels: Object.keys(statusCounts),
+    datasets: [{
+        data: Object.values(percentages),
+        backgroundColor: ['rgba(255, 99, 132, 0.6)', 'rgba(255, 159, 64, 0.6)', 'rgba(255, 205, 86, 0.6)', 'rgba(54, 162, 235, 0.6)']
+    }]
+};
+
+const ctx = document.getElementById('pieChart').getContext('2d');
+const pieChart = new Chart(ctx, {
+    type: 'pie',
+    data: chartData,
+    options: {
+        plugins: {
+            datalabels: {
+                color: '#000',
+                formatter: (value, context) => {
+                    return value.toFixed(2) + '%';
+                }
+            },
+            legend: {
+                display: true,
+                position: 'right'
+            }
+        }
+    }
+});
+
+
+// สร้างตาราง
+const tableBody = document.querySelector("#statusDataTable tbody");
+Object.keys(statusCounts).forEach(status => {
+    const row = document.createElement("tr");
+    
+    const statusCell = document.createElement("td");
+    statusCell.textContent = status;
+    
+    const countCell = document.createElement("td");
+    countCell.textContent = statusCounts[status];
+    
+    const percentageCell = document.createElement("td");
+    percentageCell.textContent = percentages[status].toFixed(2) + "%";
+    
+    row.appendChild(statusCell);
+    row.appendChild(countCell);
+    row.appendChild(percentageCell);
+    
+    tableBody.appendChild(row);
+});
+
+
+} //end function
+
+
+//  // ข้อมูลสุ่มสำหรับสถานะ (status)
+// const statuses = ['Complete', 'On Progress', 'Pending', 'Not Start'];
+// const statusData = statuses.map(() => Math.floor(Math.random() * 100));
+
+// // คำนวณรวมของ statusData
+// const total = statusData.reduce((acc, val) => acc + val, 0);
+
+// // คำนวณเปอร์เซ็นต์สำหรับแต่ละสถานะ
+// const percentageData = statusData.map(value => (value / total) * 100);
+
+// const chartData = {
+//     labels: statuses,
+//     datasets: [{
+//         data: percentageData,
+//         backgroundColor: ['rgba(255, 99, 132, 0.6)', 'rgba(255, 159, 64, 0.6)', 'rgba(255, 205, 86, 0.6)', 'rgba(54, 162, 235, 0.6)'],
+//         borderColor: ['rgba(255, 99, 132, 1)', 'rgba(255, 159, 64, 1)', 'rgba(255, 205, 86, 1)', 'rgba(54, 162, 235, 1)'],
+//         borderWidth: 1
+//     }]
+// };
+
+// const ctx = document.getElementById('pieChart').getContext('2d');
+// const pieChart = new Chart(ctx, {
+//     type: 'pie',
+//     data: chartData,
+//     options: {
+//         plugins: {
+//             datalabels: {
+//                 color: '#000',
+//                 formatter: (value) => {
+//                     return value.toFixed(2) + '%'; // แปลงเป็นเปอร์เซ็นต์และแสดงผล 2 ตำแหน่งทศนิยม
+//                 }
+//             }
+//         }
+//     }
+// });
+
+
+//     // สร้างตารางโดยใช้ข้อมูลจากตัวแปร statusData และ percentageData
+//     const tableBody = document.querySelector("#statusDataTable tbody");
+
+//     statuses.forEach((status, index) => {
+//         const row = document.createElement("tr");
+        
+//         const statusCell = document.createElement("td");
+//         statusCell.textContent = status;
+        
+//         const countCell = document.createElement("td");
+//         countCell.textContent = statusData[index];
+        
+//         const percentageCell = document.createElement("td");
+//         percentageCell.textContent = percentageData[index].toFixed(2) + "%";
+        
+//         row.appendChild(statusCell);
+//         row.appendChild(countCell);
+//         row.appendChild(percentageCell);
+        
+//         tableBody.appendChild(row);
+//     });
+
+
+</script>
+
+
+
+
+
+
+
+              </div> <!-- <div id="tab2" class="tab-content"> -->
+
+              <div id="tab3" class="tab-content"> <!-- Content for Tab 3 --> 
+
+                   <h3 class='title'>แสดงผลสำหรับ ผู้ที่ได้รับมอบหมาย Task นั้นๆ</h3>
+              </div> <!-- <div id="tab3" class="tab-content"> -->
+
+
+
+              <div id="tab4" class="tab-content"> <!-- Content for Tab 4 --> 
+
+
+                      <div class="section">
+                          <div class="container">
+                              <h1 class="title">รายละเอียดผู้พัฒนา</h1>
+
+                              <div class="columns">
+                                  <div class="column is-4">
+                                      <figure class="image is-128x128">
+                                          <img class="is-rounded" src="https://drive.google.com/uc?export=view&id=1eDQsG0aHbp8aaRnxtxm0gzvDwaUlEI2b" alt="ทศพล ตัถยานุกูล">
+                                      </figure>
+
+                                      <h2 class="subtitle">นายทศพล ตัถยานุกูล (582145)</h2>
+                                      <p>
+                                          <a href="https://github.com/lengtsp?tab=repositories" target="_blank">GitHub Profile</a><br>
+                                          ผู้ให้ความสนใจในด้าน AI
+                                      </p>
+                                      <p>
+                                          วัตถุประสงค์ในการพัฒนาเพื่อสร้าง Openplatform ที่สามารถใช้งานร่วมกันได้ทั้งธนาคาร
+                                      </p>
+
+                                      <!-- QR code image -->
+                                      <figure class="image is-128x128" style="margin-top: 20px;">
+                                          <img src="https://drive.google.com/uc?export=view&id=1LxmqoWK_SOkEaELPe4u_O734BrWyH1Bn" alt="QR Code">
+                                         
+                                      </figure>
+                                      >> Scan เพื่อเข้าถึง website <<
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+
+
+              </div><!-- <div id="tab3" class="tab-content"> -->
+
+
+          </div> <!-- tab bluema  <div id="tabContent">-->
+
+
+
+
+        </div> 
+        <!-- <div class="container"> -->
+
+
+
+    </section>
+
+
+
+
+    <!-- Form Modal (For both Add and Edit) -->
+    <div class="modal  is-fullscreen" id="formModal">
+        <div class="modal-background" onclick="closeFormModal()"></div>
+        <div class="modal-card">
+            <header class="modal-card-head">
+                <p class="modal-card-title" id="formModalTitle">Add/Edit Record</p>
+                <button class="delete" aria-label="close" onclick="closeFormModal()"></button>
+            </header>
+            <section class="modal-card-body">
+                <!-- Form Fields -->
+                <div class="field" id="div_formId">
+                    <label class="label">ID</label>
+                    <div class="control">
+                        <input class="input" type="text" id="formId">
+                    </div>
+                </div>
+
+
+                <div class="field">
+                    <label class="label">Status</label>
+                    <div class="control">
+                        <label class="radio">
+                            <input type="radio" id="statusComplete" name="status" value="Complete">
+                            Complete
+                        </label>
+                        <label class="radio">
+                            <input type="radio" id="statusOnprogress" name="status" value="Onprogress">
+                            On Progress
+                        </label>
+                        <label class="radio">
+                            <input type="radio" id="statusPending" name="status" value="Pending">
+                            Pending
+                        </label>
+                        <label class="radio">
+                            <input type="radio" id="statusNotStart" name="status" value="Not Start" checked>
+                            Not Start
+                        </label>
+                    </div>
+                </div>
+
+
+
+
+
+
+
+                <div class="field">
+                    <label class="label">Task</label>
+                    <div class="control">
+                        <input class="input" type="text" id="formTask">
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="label">Detail</label>
+                    <div class="control">
+                        <!-- <input class="input" type="text" id="formDetail"> -->
+                        <textarea id="formDetail" class="textarea" ></textarea>
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="label">URL1</label>
+                    <div class="control">
+                        <input class="input" type="text" id="formUrl1">
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="label">URL2</label>
+                    <div class="control">
+                        <input class="input" type="text" id="formUrl2">
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="label">ผู้ให้บริการ <small>(พิมพ์คำค้นเพื่อแสดง Auto Complete)</small></label>
+                    <div class="control">
+                        <input class="input" type="text" id="formWho_create">
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="label">ผู้ขอใช้บริการ <small>(พิมพ์คำค้นเพื่อแสดง Auto Complete)</small></label>
+                    <div class="control">
+                        <input class="input" type="text" id="formWho_use">
+                    </div>
+                </div>
+
+
+                <div class="field">
+                    <label class="label">Target Date</label>
+                    <div class="control">
+                        <input class="input" type="date" id="formTargetDate">
+                    </div>
+                </div>
+
+                <div class="field" style="display:none;"  >
+                    <label class="label">Create Date</label>
+                    <div class="control">
+                        <input class="input" type="text" id="formCreate_date">
+                    </div>
+                </div>
+                
+
+            </section>
+            <footer class="modal-card-foot">
+                <button class="button is-success" id="formModalActionBtn" onclick="submitForm()"><i class="fa-solid fa-check"></i>&nbsp;Save</button>
+                <button class="button" onclick="closeFormModal()"><i class="fa-solid fa-xmark"></i>&nbsp;Cancel</button>
+            </footer>
+        </div>
+    </div>
+
+
+
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal" id="deleteModal">
+        <div class="modal-background" onclick="closeDeleteModal()"></div>
+        <div class="modal-content">
+            <div class="box">
+                <h1 class="title">Confirm Delete</h1>
+                <p>Are you sure you want to delete this record?</p>
+                <div class="buttons">
+                    <button class="button is-danger" onclick="confirmDelete()"><i class="fa-solid fa-trash"></i>&nbsp;Yes, Delete</button>
+                    <button class="button" onclick="closeDeleteModal()"><i class="fa-solid fa-xmark"></i>&nbsp;Cancel</button>
+                </div>
+            </div>
+        </div>
+        <button class="modal-close is-large" onclick="closeDeleteModal()"></button>
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<style>
+
+        .tab-content {
+            display: none;
+        }
+
+</style>
+<script>
+
+      //bluema สลับ tab
+      // Show the content of the active tab on page load
+      window.addEventListener("DOMContentLoaded", function() {
+          let activeTab = document.querySelector(".tabs ul li.is-active a");
+          if (activeTab) {
+              document.querySelector(activeTab.getAttribute("href")).style.display = "block";
+          }
+      });
+
+
+      document.querySelectorAll(".tabs ul li a").forEach(function(tabLink) {
+          tabLink.addEventListener("click", function(event) {
+              event.preventDefault();
+              
+              // Remove active class from all tab links
+              document.querySelectorAll(".tabs ul li").forEach(function(tab) {
+                  tab.classList.remove("is-active");
+              });
+
+              // Add active class to the clicked tab link
+              this.parentElement.classList.add("is-active");
+
+              // Hide all tab content
+              document.querySelectorAll("#tabContent .tab-content").forEach(function(tabContent) {
+                  tabContent.style.display = "none";
+              });
+
+              // Show the associated tab content
+              document.querySelector(this.getAttribute("href")).style.display = "block";
+          });
+      });
+
+      //bluema สลับ tab--------------------
+
+
+
+
+
+
+
+
+        function showSpinner() {
+            // alert('test1');
+            $("#spinner").show();
+        }
+
+        function hideSpinner() {
+            // alert('test2');
+            $("#spinner").hide();
+        }
+
+
+
+
+
+
+        let isEditing = false; // Flag to determine add vs edit
+
+        let currentEditingId = null;
+
+
+
+        function fetchSheetData() {
+            showSpinner();
+            google.script.run.withSuccessHandler(function(data){
+                renderTable(data);
+                hideSpinner();
+            }).fetchMappedData();
+            // }).getSheetData();
+
+
+        }
+
+
+
+function navigateToDetail(btn) {
+    const data = $('#dataTable').DataTable().row($(btn).parents('tr')).data();
+    const idValue = data[0];
+    reLoad('detail', idValue);
+}
+
+function reLoad(page, id) {
+    google.script.run
+        .withSuccessHandler(function(url) {
+            const newUrl = `${url}?page=${page}&id=${id}`;
+            window.open(newUrl, '_top');
+        })
+        .getScriptURL();
+
+
+        console.log('complete')
+}
+
+
+
+
+
+
+
+        function renderTable(data) {
+            const mappedData = data.mappedData;  // สร้างตัวแปรเพื่อเก็บ data.mappedData
+            const mapSubData = data.map_sub_data;  // สร้างตัวแปรเพื่อเก็บ data.map_sub_data
+
+
+
+            $('#dataTable').DataTable().destroy();
+            $('#dataTable').DataTable({
+
+              
+                data: mappedData.slice(0),
+                columns: [
+                    { data: 0 },
+                    { data: 1 },
+                    { data: 2 },
+                    { data: 3 },
+                    { data: 4 },
+                    { data: 5 },
+                    { data: 6 },
+                    { data: 7 },
+                    { data: 8 },
+                    { data: 9 },
+
+                    { data: 11 },
+
+
+
+                    {
+                        data: null,
+                        defaultContent: '\
+                        <button class="button is-small is-link" onclick="prepareEditModal(this);"><i class="fas fa-edit"></i></button>\
+                        <button class="button is-small is-danger" onclick="showDeleteModal(this);"><i class="fas fa-trash-alt"></i></button>\
+                        <button class="button is-small is-success" onclick="navigateToDetail(this);"><i class="fa-solid fa-eye"></i></button>'
+                    }
+                ],
+                order: [[7, 'desc']],
+                columnDefs: [
+                  {
+                      targets: 0,  // The running number column
+                      orderable: false,
+                      searchable: false,
+                      render: function (data, type, row, meta) {
+                          return meta.row + 1;  // +1 because DataTables index is 0 based
+                      }
+                  },
+
+
+
+                  {
+                      targets: [2,3, 6,8,9],  // Target column index
+                      visible: false
+                  },
+
+
+
+                      {
+                          targets: 1,
+                          render: function (data, type, row) {
+                              const url1Data = row[3];
+                              const url2Data = row[4];
+                              let urlResult = '';
+                              let completeLabel = '';
+                              const subDataList = getSubDataForTask(row[0], mapSubData); // ใช้ฟังก์ชันที่สร้างขึ้นมา
+
+
+                              // Check if row[11] is "Complete"
+                              if (row[11] === "Complete") {
+                                  completeLabel = '<span class="tag is-info">Complete</span> ';
+                              } else if (row[11] === "Pending") {
+                                  completeLabel = '<span class="tag is-danger">Pending</span> ';
+                              }
+
+                              // Check if Url1 is not empty
+                              if (url1Data) {
+                                  urlResult += `<a href="${url1Data}" target="_blank">Link1</a>`;
+                              }
+
+                              // Check if Url2 is not empty
+                              if (url2Data) {
+                                  // If Url1 was not empty, append a comma separator
+                                  if (urlResult) {
+                                      urlResult += ', ';
+                                  }
+                                  urlResult += `<a href="${url2Data}" target="_blank">Link2</a>`;
+                              }
+
+                              // return `${completeLabel}${data} <small>${urlResult}</small><br>
+                              //         <small><b>Created Date</b> : ${row[8]}</small>`;
+
+                              return `${completeLabel}${data}  <small>${urlResult}</small><br>
+                                      <small><b>Created Date</b> : ${row[8]}</small>
+                                      <br><br>
+                                      ${subDataList}
+                                      
+                                      
+                                      `;  // เพิ่ม ${subDataList} ที่นี่
+
+                                      
+                          }
+                      },
+                  {
+                      targets: 5,
+                      render: function (data, type, row) {
+
+                          const url2Data = row[6];
+                          return `<small>
+                                  <b>ผู้ให้บริการ</b> : ${row[12]} (${data}) 
+                                  <br>
+                                  <b>ผู้ขอใช้บริการ</b> : ${row[17]} (${url2Data})</small>`;
+                      }
+                  },
+
+
+                  {
+                      targets: 7,
+                      render: function (data, type, row) {
+                          if (row[11] === "Complete") {
+                              return `<span style="text-decoration: line-through;">${data}</span>`;
+                          }
+
+                          const currentDate = new Date();
+                          const targetDate = new Date(data);
+
+                          let diffTime = targetDate - currentDate;
+                          const isOverdue = diffTime < 0;
+                          
+                          diffTime = Math.abs(diffTime);
+                          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                          const months = Math.floor(diffDays / 30);
+                          const days = diffDays % 30;
+
+                          let timeDifference = "";
+
+                          if (months > 0) {
+                              timeDifference += `${months} เดือน `;
+                          }
+                          if (days > 0) {
+                              timeDifference += `${days} วัน`;
+                          }
+
+                          if (isOverdue) {
+                              return `${data} <br> <font color='red'>เลยกำหนด ${timeDifference}</font>`;
+                          } else {
+                              return `${data} <br> เหลือ ${timeDifference}`;
+                          }
+                      }
+                  },
+                  {
+                      targets: 4,
+                      visible: false
+                  },
+
+                  {
+                      targets: 1,  // Targeting the 9th column (index starts from 0)
+                      width: '30%'
+                  },
+                  {
+                      targets: [0],  // Targeting the 9th column (index starts from 0)
+                      width: '5%'
+                  },
+
+                  {
+                      targets: [7],  // Targeting the 9th column (index starts from 0)
+                      width: '12%'
+                  }
+                  
+                  ,
+                  {
+                      targets: [10, 11],  // Targeting the 9th column (index starts from 0)
+                      width: '12%'
+                  }
+                                      
+                  
+                  ], //columnDefs
+            });
+        } //end function
+
+
+
+        // function getSubDataForTask(taskId, subData) {
+        //     const matchedSubData = subData.filter(row => row[1] === taskId);
+        //     if (matchedSubData.length > 0) {
+        //         const listItems = matchedSubData.map(row => `<li class="is-small"><i class="fas fa-arrow-right"></i> ${row[2]}</li>`).join('');
+        //         return `<div class="box"><ul>${listItems}</ul></div>`;
+        //     }
+        //     return '';
+        // }
+
+        function navigateToDetail_sub(myid) {
+            console.log('test')
+            showSpinner();
+            reLoad('sub', myid);
+        }
+
+
+
+
+        function getSubDataForTask(taskId, subData) {
+            const matchedSubData = subData.filter(row => row[1] === taskId);
+            if (matchedSubData.length > 0) {
+                const itemCount = matchedSubData.length;
+                // const listItems = matchedSubData.map(row => `<li class="is-small"><i class="fas fa-arrow-right"></i> ${row[2]}</li>`).join('');
+
+                const listItems = matchedSubData.map(row => `<li class="is-small"><i class="fas fa-arrow-right"></i> 
+                                                                  <span class="clickable-span" onclick="navigateToDetail_sub('${row[0]}')">${row[2]}</span>
+                                                          </li>`).join('');
+
+
+                return `
+                    <div class="box">
+                        <i class="fas fa-chevron-down toggle-arrow" onclick="toggleContent(this)"></i> Found ${itemCount} items
+                        <ul class="content-to-toggle" style="display: none;">${listItems}</ul>
+                    </div>`;
+            }
+            return '';
+        }
+
+        function toggleContent(element) {
+            const contentElement = element.nextElementSibling;
+            if (contentElement.style.display === "none" || contentElement.style.display === "") {
+                contentElement.style.display = "block";
+                element.classList.add('rotated');
+            } else {
+                contentElement.style.display = "none";
+                element.classList.remove('rotated');
+            }
+        }
+
+
+
+
+
+
+        function submitForm() {
+
+          console.log($("input[name='status']:checked").val())
+            let data = {
+                id: isEditing ? $("#formId").val() : generateId(),
+                task: $("#formTask").val(),
+                detail: $("#formDetail").val(),
+                url1: $("#formUrl1").val(),
+                url2: $("#formUrl2").val(),
+                who_create: $("#formWho_create").val(),
+                who_use: $("#formWho_use").val(),
+                target_date: $("#formTargetDate").val(),
+                create_update: $("#formCreate_date").val(),
+                last_update: '',
+                status: $("input[name='status']:checked").val()  // ค่าของ radio button ที่ถูกเลือก
+            };
+
+            if (isEditing) {
+              console.log('edit_condition')
+                // console.log(data.mappedData.create_update)
+                google.script.run.withSuccessHandler(fetchSheetData).editRow(data);
+            } else {
+                google.script.run.withSuccessHandler(fetchSheetData).addRow(data);
+            }
+            closeFormModal();
+        }
+
+        // function generateId() {
+        //     const currentDate = new Date();
+        //     const formattedDate = currentDate.toISOString().split('T')[0];
+        //     const timestamp = Date.now();
+        //     return `${formattedDate}_${timestamp}`;
+        // }
+
+
+        function generateId() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                var r = Math.random() * 16 | 0,
+                    v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
+
+
+
+
+
+        function openAddModal() {
+            $('#formModalTitle').text('Add New Record');
+            $('#formModalActionBtn').html('<i class="fa-solid fa-check"></i>&nbsp;Add');
+            clearForm();
+            isEditing = false;
+            $('#formModal').addClass('is-active');
+            $('#formId').prop('disabled', false);
+            $('#div_formId').css('display', 'none');
+
+        }
+
+        function clearForm() {
+            $("#formId").val('');
+            $("#formTask").val('');
+            $("#formDetail").val('');
+            $("#formUrl1").val('');
+            $("#formUrl2").val('');
+            $("#formWho_create").val('');
+           $("#formWho_use").val('');
+           $("#formTargetDate").val('');
+
+        }
+
+        function prepareEditModal(btn) {
+            const data = $('#dataTable').DataTable().row($(btn).parents('tr')).data();
+            openEditModal(data);
+        }
+
+        function openEditModal(data) {
+            $('#formModalTitle').text('Edit Record');
+            $('#formModalActionBtn').html('<i class="fa-solid fa-check"></i>&nbsp;Edit');
+            $('#formId').val(data[0]);
+            $('#formTask').val(data[1]);
+            $('#formDetail').val(data[2]);
+            $('#formUrl1').val(data[3]);
+            $('#formUrl2').val(data[4]);
+            $('#formWho_create').val(data[5]);
+            $('#formWho_use').val(data[6]);
+            $('#formTargetDate').val(data[7]);   
+            $('#formCreate_date').val(data[8]);   
+            $("input[name='status'][value='" + data[11] + "']").prop('checked', true);
+
+            isEditing = true;
+
+            $('#formModal').addClass('is-active');
+            $('#div_formId').css('display', 'block');
+            $('#formId').prop('disabled', true);
+        }
+
+        function closeFormModal() {
+            $('#formModal').removeClass('is-active');
+        }
+
+
+        //---------------------------
+        function deleteRecord(btn) {
+            const data = $('#dataTable').DataTable().row($(btn).parents('tr')).data();
+            google.script.run.withSuccessHandler(fetchSheetData).deleteRow(data[0]);
+        }
+
+        let deleteButtonElement;
+
+        function showDeleteModal(buttonElement) {
+            deleteButtonElement = buttonElement;
+            document.getElementById('deleteModal').classList.add('is-active');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.remove('is-active');
+        }
+
+        function confirmDelete() {
+            deleteRecord(deleteButtonElement);
+            closeDeleteModal();
+        }
+        //---------------------------
+
+
+
+
+
+
+
+
+
+        
+
+        $(document).ready(function () {
+            fetchSheetData();
+        });
+
+
+
+
+
+
+
+
+
+
+function setupAutocomplete(data) {
+
+
+  $("#formWho_create, #formWho_use").autocomplete({
+    source: data.map(function(row) { // แก้ data.mappedData.map ตรงนี้อย่างไร
+      return {
+        label: row[1] + ' (' + row[0] + ')',  // "ชื่อ - สกุล (ID)"
+        value: row[0]  // "ID"
+      };
+    }),
+    minLength: 3,  // กำหนดให้แสดง autocomplete เมื่อพิมพ์ตั้งแต่ 3 ตัวอักษรขึ้นไป
+    select: function(event, ui) {
+      event.preventDefault();
+      this.value = ui.item.value;
+    }
+  });
+}
+
+
+
+
+// ดึงข้อมูลจาก Google Apps Script และตั้งค่า Autocomplete
+google.script.run.withSuccessHandler(setupAutocomplete).getStaffData();
+
+
+
+
+    </script>
+</body>
+
+</html>

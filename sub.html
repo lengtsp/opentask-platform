@@ -1,0 +1,581 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Sub Detail</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+
+
+    <base target="_top">
+
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+
+
+
+
+<style>
+      #dataTable_sub {
+        width: 100% !important;
+        font-size: 14px;
+    }
+        /* กำหนดให้ font ขนาดเล็กสำหรับ column ซ้าย */
+        .left-column {
+            font-size: 0.8rem;
+        }
+  </style>
+
+
+</head>
+
+
+
+
+<body>
+<div id="spinner" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);display:none;z-index:9999;">
+    <i class="fas fa-circle-notch fa-spin fa-3x"></i>
+</div>
+<section class="section">
+    <div class="container">
+        <h1 class="title">SubTask Detail</h1>
+
+        
+
+
+        <div id="taskContent" >
+
+            <div class="box"><small>
+                                      <p><strong>sub_taskid:</strong> <span id="sub_taskid"></span></p>
+                                      <p><strong>taskid:</strong> <span id="taskid"></span></p>
+                                      <p><strong>title:</strong> <span id="title"></span></p>
+                                      <p><strong>detail:</strong> <span id="detail"></span></p>
+                                      <p><strong>date1:</strong> <span id="date1"></span></p>
+                                      <p><strong>data2:</strong> <span id="data2"></span></p>
+                                      <p><strong>data3:</strong> <span id="data3"></span></p>
+                                      <p><strong>data4:</strong> <span id="data4"></span></p>
+                                      <p><strong>data5:</strong> <span id="data5"></span></p>
+                                      <p><strong>create date:</strong> <span id="createDate"></span></p>
+                          </small>
+
+
+            </div>
+            <button class="button is-link is-small" onclick="navigateToDetail()">
+                <i class="fas fa-arrow-left"></i>&nbsp;Back to subtasks
+            </button>
+            <button class="button is-Primary is-small" onclick="navigateToIndex()">
+                <i class="fas fa-arrow-left"></i>&nbsp;Back to index
+            </button>
+
+
+
+
+        </div>
+
+
+    </div>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <script>
+    const subtaskId = <?= id ?>;
+    console.log('subtaskId')
+    console.log(subtaskId)
+
+
+
+
+function navigateToIndex() {
+    reLoad('index');
+}
+
+
+
+function navigateToDetail() {
+    const myid = $('#taskid').text();
+    reLoad('detail', myid);
+}
+
+function reLoad(page, id) {
+    google.script.run
+        .withSuccessHandler(function(url) {
+            if (id) {
+                url += `?page=${page}&id=${id}`;
+            } else {
+                url += `?page=${page}`;
+            }
+            window.open(url, '_top');
+        })
+        .getScriptURL();
+}
+
+
+console.log(getParameterByName('id'));  // จะทำการแสดงค่า id ที่ได้จาก URL ใน console
+
+function fetchTaskData() {
+    // ดึง id จาก URL
+
+
+    // ดึงข้อมูล task จาก Google Sheets
+    google.script.run
+        .withSuccessHandler(displayTaskData)
+        .getSubTaskDataFromSheetById(subtaskId);
+}
+
+function getParameterByName(name, url = google.script.url.getLocation()) {
+    name = name.replace(/[\[\]]/g, '\\$&');
+    const regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)');
+    const results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, ' '));
+}
+
+
+
+
+
+
+
+
+
+function displayTaskData(taskData) {
+    // กำหนดค่าฟิลด์ในหน้าเว็บ
+    $('#sub_taskid').text(taskData.sub_taskid);
+    $('#taskid').text(taskData.taskid);
+    $('#title').text(taskData.title);
+    $('#detail').text(taskData.detail);
+    $('#date1').text(taskData.date1);
+    $('#data2').text(taskData.data2);
+    $('#data3').text(taskData.data3);
+    $('#data4').text(taskData.data4);
+    $('#data5').text(taskData.data5);
+    $('#createDate').text(taskData.create_date);
+
+    // กำหนดค่าฟิลด์ใน Modal
+    $('#formSub_taskid').val(taskData.sub_taskid);
+    $('#formTaskid').val(taskData.taskid);
+    $('#formTitle').val(taskData.title);
+    $('#formDetail').val(taskData.detail);
+    $('#formDate1').val(taskData.date1);
+    $('#formData2').val(taskData.data2);
+    $('#formData3').val(taskData.data3);
+    $('#formData4').val(taskData.data4);
+    $('#formData5').val(taskData.data5);
+    $('#formCreateDate').val(taskData.create_date);
+
+    // Assuming you still have a status radio button
+    // $("input[name='status'][value='" + taskData.status + "']").prop('checked', true);
+}
+
+
+
+
+
+// เรียกฟังก์ชัน fetchTaskData เมื่อหน้าเว็บโหลดเสร็จ
+window.onload = fetchTaskData;
+
+
+
+
+
+
+
+        let isEditing = false; // Flag to determine add vs edit
+
+
+
+
+
+        function submitForm() {
+
+            let data = {
+                id: isEditing ? $("#formId").val() : generateId(),
+                task: $("#formTask").val(),
+                detail: $("#formDetail").val(),
+                url1: $("#formUrl1").val(),
+                url2: $("#formUrl2").val(),
+                who_create: $("#formWho_create").val(),
+                who_use: $("#formWho_use").val(),
+                target_date: $("#formTargetDate").val(),
+                create_update: $("#formCreate_date").val(),
+                last_update: '',
+                status: $("input[name='status']:checked").val()  // ค่าของ radio button ที่ถูกเลือก
+            };
+            if (isEditing) {
+                google.script.run.withSuccessHandler(fetchSheetData).editRow_sub(data);
+                
+            } 
+            closeFormModal();
+        }
+
+
+
+        function submitForm_sub() {
+            let data = {
+                comment_taskid: isEditing ? $("#formCommentTaskid_sub").val() : generateId_sub(),
+                taskid: $("#taskId").text(),  // ใช้ค่าจาก <span id="taskId">
+                title: $("#formTitle_sub").val(),
+                detail: $("#formDetail_sub").val(),
+                date1: $("#formDate1_sub").val(),
+                date2: $("#formDate2_sub").val(),
+                date3: $("#formDate3_sub").val(),
+                date4: $("#formDate4_sub").val(),
+                date5: $("#formDate5_sub").val(),
+            };
+
+            console.log('isEditing ', isEditing)
+            if (isEditing) {
+                console.log('submitForm_sub เข้าเงื่อนไข isEditing')
+                google.script.run.withSuccessHandler(fetchSheetData).editRow_sub(data);
+            } else {
+               google.script.run.withSuccessHandler(fetchSheetData).addRow_sub(data);
+            }
+            closeFormModal_sub();
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+//copy มาจาก index.html
+
+
+        function prepareEditModal_sub() {
+            openEditModal_sub(subtaskId);
+        } // end function
+
+
+        function openEditModal_sub(data_sub) {
+            $('#formModalTitle_sub').text('Edit Record');
+
+            $('#formModalActionBtn_sub').html('<i class="fa-solid fa-check"></i>&nbsp;Edit');
+
+            // $('#formModalActionBtn_sub').text('Edit');
+
+
+            $('#formCommentTaskid_sub').val(data_sub[0]);
+            $('#formTaskid_sub').val(data_sub[1]);
+
+            $('#formTitle_sub').val(data_sub[2]);
+            $('#formDetail_sub').val(data_sub[3]);
+            $('#formDate1_sub').val(data_sub[4]);
+            $('#formDate2_sub').val(data_sub[5]);
+            $('#formDate3_sub').val(data_sub[6]);
+            $('#formDate4_sub').val(data_sub[7]);
+            $('#formDate5_sub').val(data_sub[8]);   
+
+            isEditing = true;
+
+            $('#formModal_sub').addClass('is-active');
+            $('#div_formId_sub').css('display', 'block');
+            $('#formCommentTaskid_sub').prop('disabled', true);
+        }
+
+
+
+        function closeFormModal_sub() {
+            $('#formModal_sub').removeClass('is-active');
+        }
+
+
+
+
+        function closeFormModal() {
+            $('#formModal').removeClass('is-active');
+        }
+
+
+
+        function fetchSheetData() {
+            // showSpinner();
+
+            // หน่วงเวลา 3 วินาทีก่อนเรียกฟังก์ชัน navigateToIndex()
+            // setTimeout(() => {
+                // navigateToIndex();
+            // }, 3000); // 3,000 มิลลิวินาที = 3 วินาที
+            console.log('success')
+            fetchTaskData();
+        }
+
+        //---------------------------
+        function deleteRecord() {
+            // const data = $('#dataTable').DataTable().row($(btn).parents('tr')).data();
+            google.script.run.withSuccessHandler(fetchSheetData).deleteRow(subtaskId);
+        }
+
+
+        function deleteRecord_sub(btn) {
+
+
+            const data = $('#dataTable_sub').DataTable().row($(btn).parents('tr')).data();
+            console.log('data')
+            console.log(data)
+            google.script.run.withSuccessHandler(fetchSheetData).deleteRow_sub(data[0]);
+        }
+
+
+        let deleteButtonElement;
+
+        function showDeleteModal(buttonElement) {
+            deleteButtonElement = buttonElement;
+            document.getElementById('deleteModal').classList.add('is-active');
+        }
+        
+
+
+
+   
+
+        //---------------------------
+
+
+
+
+
+
+
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.remove('is-active');
+        }
+
+
+        function closeDeleteModal_sub() {
+            document.getElementById('deleteModal_sub').classList.remove('is-active');
+        }
+
+
+
+        function confirmDelete() {
+            // deleteRecord(deleteButtonElement);
+            deleteRecord();
+            closeDeleteModal();
+
+
+            setTimeout(() => {
+                navigateToIndex();
+            }, 3000); // 3,000 มิลลิวินาที = 3 วินาที
+        }
+        //---------------------------
+
+
+
+
+
+        let deleteButtonElement_sub;
+
+
+        function showDeleteModal_sub(buttonElement) {
+            deleteButtonElement_sub = buttonElement;
+            document.getElementById('deleteModal_sub').classList.add('is-active');
+        }
+
+        function confirmDelete_sub() {
+            deleteRecord_sub(deleteButtonElement_sub);
+            closeDeleteModal_sub();
+
+
+            // setTimeout(() => {
+            //     fetchSheetData();
+            // }, 3000); // 3,000 มิลลิวินาที = 3 วินาที
+        } // end function
+
+
+
+
+      function setupAutocomplete(data) {
+        $("#formWho_create, #formWho_use").autocomplete({
+          source: data.map(function(row) {
+            return {
+              label: row[1] + ' (' + row[0] + ')',  // "ชื่อ - สกุล (ID)"
+              value: row[0]  // "ID"
+            };
+          }),
+          minLength: 3,  // กำหนดให้แสดง autocomplete เมื่อพิมพ์ตั้งแต่ 3 ตัวอักษรขึ้นไป
+          select: function(event, ui) {
+            event.preventDefault();
+            this.value = ui.item.value;
+          }
+        });
+      }
+
+
+
+
+      // ดึงข้อมูลจาก Google Apps Script และตั้งค่า Autocomplete
+      google.script.run.withSuccessHandler(setupAutocomplete).getStaffData();
+
+
+
+
+
+
+
+
+
+
+        function renderTable_sub(data) {
+            console.log('data')
+            console.log(data)
+            $('#dataTable_sub').DataTable().destroy();
+            $('#dataTable_sub').DataTable({
+
+              
+                data: data.slice(0),
+                columns: [
+                    { data: 0 },
+                    { data: 1 },
+                    { data: 2 },
+                    { data: 3 },
+                    { data: 4 },
+                    { data: 5 },
+                    { data: 6 },
+                    { data: 7 },
+                    { data: 8 },
+                    { data: 9 },
+
+                    { data: 10 },
+                    {
+                        data: null,
+                        defaultContent: '\
+                        <button class="button is-small is-link" onclick="prepareEditModal_sub(this);"><i class="fas fa-edit"></i></button>\
+                        <button class="button is-small is-danger" onclick="showDeleteModal_sub(this);"><i class="fas fa-trash-alt"></i></button>'
+                    }
+                ],
+
+                order: [[10, 'desc']], //sort create date
+                columnDefs: [
+                 {
+                      targets: [0,1,5,6,7,8,9,10],  // Target column index
+                      visible: false
+                  },
+                ]
+                             
+
+
+            });
+        }
+
+
+
+
+
+
+        function fetchSheetData() {
+            showSpinner();
+            console.log('taskId')
+            console.log(taskId)
+            google.script.run.withSuccessHandler(function(data){
+                renderTable_sub(data);
+                hideSpinner();
+            }).getSheetData_sub(taskId);
+        }
+
+        function showSpinner() {
+            // alert('test1');
+            $("#spinner").show();
+        }
+
+        function hideSpinner() {
+            // alert('test2');
+            $("#spinner").hide();
+        }
+
+
+
+        // $(document).ready(function () {
+        //     fetchSheetData();
+        // });
+
+
+
+
+        function openAddModal_sub() {
+            $('#formModalTitle_sub').text('Add New Sub Task');
+            // $('#formModalActionBtn_sub').text('Add');
+            $('#formModalActionBtn_sub').html('<i class="fa-solid fa-check"></i>&nbsp;Add');
+
+
+
+            clearForm_sub();
+            isEditing = false;
+            $('#formModal_sub').addClass('is-active');
+            $('#formId_sub').prop('disabled', false);
+            $('#div_formId_sub').css('display', 'none');
+        }
+
+
+        function clearForm_sub() {
+          //   $("#formId_sub").val('');
+          //   $("#formTask_sub").val('');
+          //   $("#formDetail_sub").val('');
+          //   $("#formUrl1_sub").val('');
+          //   $("#formUrl2_sub").val('');
+          //   $("#formWho_create_sub").val('');
+          //  $("#formWho_use_sub").val('');
+          //  $("#formTargetDate_sub").val('');
+
+
+
+            $('#formCommentTaskid_sub').val('');
+            $('#formTaskid_sub').val('');
+
+            $('#formTitle_sub').val('');
+            $('#formDetail_sub').val('');
+            $('#formDate1_sub').val('');
+            $('#formDate2_sub').val('');
+            $('#formDate3_sub').val('');
+            $('#formDate4_sub').val('');
+            $('#formDate5_sub').val('');   
+        } // end function
+
+        function closeFormModal_sub() {
+            $('#formModal_sub').removeClass('is-active');
+        }
+
+
+        function generateId_sub() {
+            const currentDate = new Date();
+            const formattedDate = currentDate.toISOString().split('T')[0];
+            const timestamp = Date.now();
+            return `sub_${formattedDate}_${timestamp}`;
+        }
+
+
+    </script>
+
+    
+</body>
+</html>
+

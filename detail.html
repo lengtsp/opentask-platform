@@ -1,0 +1,1333 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Task Detail</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+
+
+    <base target="_top">
+
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+
+
+
+
+<style>
+h1.title {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+
+      #dataTable_task_permission {
+        width: 100% !important;
+        font-size: 14px;
+    }
+
+      #dataTable_sub {
+        width: 100% !important;
+        font-size: 14px;
+    }
+        /* กำหนดให้ font ขนาดเล็กสำหรับ column ซ้าย */
+        .left-column {
+            font-size: 0.8rem;
+        }
+  </style>
+
+
+</head>
+
+
+
+
+<body>
+<div id="spinner" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);display:none;z-index:9999;">
+    <i class="fas fa-circle-notch fa-spin fa-3x"></i>
+</div>
+<section class="section">
+    <div class="container">
+        <h1 class="title"><i class="fa-solid fa-universal-access"></i> Task Detail 
+            <span id="arrow" onclick="toggleContent()" style="cursor:pointer;"><i class="fas fa-chevron-down"></i></span>
+        </h1>
+
+        
+        <p><small><strong>ID:</strong> <span id="taskId"></span></small></p>
+        <p><small><strong>Task:</strong> <span id="taskName"></span></small></p>
+        
+
+        <div id="taskContent" style="display:none;">
+            <button class="button is-info is-small" onclick="prepareEditModal()">Edit Task</button>
+            <button class="button is-small is-danger" onclick="showDeleteModal(this);">Delete Task</button>
+            <div class="box"><small>
+                          <p><strong>Detail:</strong> <span id="taskDetail"></span></p>
+                          <p><strong>URL1:</strong> <a id="url1" target="_blank">Link</a></p>
+                          <p><strong>URL2:</strong> <a id="url2" target="_blank">Link</a></p>
+                          <p><strong>เจ้าของงาน:</strong> <span id="owner"></span></p>
+                          <p><strong>ผู้ใช้:</strong> <span id="user"></span></p>
+                          <p><strong>Target Date:</strong> <span id="targetDate"></span></p>
+                          <p><strong>Created Update:</strong> <span id="createdUpdate"></span></p>
+                          <p><strong>Last Update:</strong> <span id="lastUpdate"></span></p>
+                          <p><strong>Who Login:</strong> <span id="whoLogin"></span></p>
+                          <p><strong>Status:</strong> <span id="status"></span></p>
+                          </small>
+            </div>
+
+<hr>
+
+            <h1 class="title"><i class="fa-solid fa-user"></i> คนที่มีสิทธิ์เข้าถึง Task
+                <span id="arrow_task_permission" onclick="toggleContent_task_permission()" style="cursor:pointer;"><i class="fas fa-chevron-down"></i></span>
+            </h1>
+
+            <div id="taskContent_task_permission" style="display:none;">
+
+
+                  <button class="button is-primary is-small" onclick="openAddModal_task_permission()"><i class="fa-solid fa-plus"></i>&nbsp;Add Task Permission</button>
+
+                  <div class="box">
+                                <table id="dataTable_task_permission" class="display mt-4">
+                                    <thead>
+                                        <tr>
+                                            <th>accessrole_id</th>
+                                            <th>taskid</th>
+                                            <th>emplid</th>
+                                            <th>name</th>
+                                            <th>rc_code</th>
+                                            <th>rc_name</th>
+                                            <th>branch</th>
+                                            <th>Assign Date Time</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                  </div><!-- box -->
+            </div> <!-- <div id="taskContent" style="display:none;"> -->
+
+
+
+            <button class="button is-link is-primary is-small" onclick="navigateToIndex()">
+                <i class="fas fa-arrow-left"></i>&nbsp;Back to index
+            </button>
+
+
+        </div><!-- <div id="taskContent" style="display:none;"> -->
+
+<hr>
+
+        <h1 class="title"><i class="fa-solid fa-folder-plus"></i> Sub Task</h1>
+        
+        <button class="button is-primary is-small" onclick="openAddModal_sub()"><i class="fa-solid fa-plus"></i>&nbsp;Add Sub task</button>
+
+        <button class="button is-link is-small" onclick="navigateToIndex()"><i class="fas fa-chevron-left"></i>&nbsp;Back to index</button>
+
+        <div class="box">
+                      <table id="dataTable_sub" class="display mt-4">
+                          <thead>
+                              <tr>
+                                  <th>comment_taskid</th>
+                                  <th>taskid</th>
+                                  <th>title</th>
+                                  <th>detail</th>
+
+                                  <th>Target Date</th>
+                                  <th>data1</th>
+                                  <th>date2</th>
+                                  <th>date3</th>
+                                  <th>date4</th>
+                                  <th>date5</th>
+
+                                  <th>create date</th>
+                                  <th>Actions</th>
+                              </tr>
+                          </thead>
+                          <tbody>
+                          </tbody>
+                      </table>
+
+
+
+        </div><!-- box -->
+
+
+    </div>
+        <!-- <div class="container"> -->
+
+
+
+  
+
+
+</section>
+
+<script>
+function toggleContent() {
+    var content = document.getElementById('taskContent');
+    var arrow = document.getElementById('arrow');
+    if (content.style.display === 'none') {
+        content.style.display = 'block';
+        arrow.innerHTML = '<i class="fas fa-chevron-up"></i>'; // แสดงไอคอนลูกศรขึ้น
+    } else {
+        content.style.display = 'none';
+        arrow.innerHTML = '<i class="fas fa-chevron-down"></i>'; // แสดงไอคอนลูกศรลง
+    }
+}
+
+function toggleContent_task_permission() {
+    var content = document.getElementById('taskContent_task_permission');
+    var arrow = document.getElementById('arrow_task_permission');
+    if (content.style.display === 'none') {
+        content.style.display = 'block';
+        arrow.innerHTML = '<i class="fas fa-chevron-up"></i>'; // แสดงไอคอนลูกศรขึ้น
+    } else {
+        content.style.display = 'none';
+        arrow.innerHTML = '<i class="fas fa-chevron-down"></i>'; // แสดงไอคอนลูกศรลง
+    }
+}
+
+
+</script>
+
+
+
+
+
+
+
+
+
+
+    <!-- Form Modal (For both Add and Edit) -->
+    <div class="modal  is-fullscreen" id="formModal">
+        <div class="modal-background" onclick="closeFormModal()"></div>
+        <div class="modal-card">
+            <header class="modal-card-head">
+                <p class="modal-card-title" id="formModalTitle">Add/Edit Record</p>
+                <button class="delete" aria-label="close" onclick="closeFormModal()"></button>
+            </header>
+            <section class="modal-card-body">
+                <!-- Form Fields -->
+                <div class="field" id="div_formId">
+                    <label class="label">ID</label>
+                    <div class="control">
+                        <input class="input" type="text" id="formId">
+                    </div>
+                </div>
+
+
+                <div class="field">
+                    <label class="label">Status</label>
+                    <div class="control">
+                        <label class="radio">
+                            <input type="radio" id="statusComplete" name="status" value="Complete">
+                            Complete
+                        </label>
+                        <label class="radio">
+                            <input type="radio" id="statusOnprogress" name="status" value="Onprogress">
+                            On Progress
+                        </label>
+                        <label class="radio">
+                            <input type="radio" id="statusPending" name="status" value="Pending">
+                            Pending
+                        </label>
+                        <label class="radio">
+                            <input type="radio" id="statusNotStart" name="status" value="Not Start" checked>
+                            Not Start
+                        </label>
+                    </div>
+                </div>
+
+
+
+
+
+
+
+                <div class="field">
+                    <label class="label">Task</label>
+                    <div class="control">
+                        <input class="input" type="text" id="formTask">
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="label">Detail</label>
+                    <div class="control">
+                        <!-- <input class="input" type="text" id="formDetail"> -->
+                        <textarea id="formDetail" class="textarea" ></textarea>
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="label">URL1</label>
+                    <div class="control">
+                        <input class="input" type="text" id="formUrl1">
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="label">URL2</label>
+                    <div class="control">
+                        <input class="input" type="text" id="formUrl2">
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="label">ผู้ให้บริการ <small>(พิมพ์คำค้นเพื่อแสดง Auto Complete)</small></label>
+                    <div class="control">
+                        <input class="input" type="text" id="formWho_create">
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="label">ผู้ขอใช้บริการ <small>(พิมพ์คำค้นเพื่อแสดง Auto Complete)</small></label>
+                    <div class="control">
+                        <input class="input" type="text" id="formWho_use">
+                    </div>
+                </div>
+
+
+                <div class="field">
+                    <label class="label">Target Date</label>
+                    <div class="control">
+                        <input class="input" type="date" id="formTargetDate">
+                    </div>
+                </div>
+
+                <div class="field" style="display:none;"  >
+                    <label class="label">Create Date</label>
+                    <div class="control">
+                        <input class="input" type="text" id="formCreate_date">
+                    </div>
+                </div>
+                
+
+            </section>
+            <footer class="modal-card-foot">
+                <button class="button is-success" id="formModalActionBtn" onclick="submitForm()">Save</button>
+                <button class="button" onclick="closeFormModal()">Cancel</button>
+            </footer>
+        </div>
+    </div>
+
+
+
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal" id="deleteModal">
+        <div class="modal-background" onclick="closeDeleteModal()"></div>
+        <div class="modal-content">
+            <div class="box">
+                <h1 class="title">Confirm Delete</h1>
+                <p>Are you sure you want to delete this record?</p>
+                <div class="buttons">
+                    <button class="button is-danger" onclick="confirmDelete()">Yes, Delete</button>
+                    <button class="button" onclick="closeDeleteModal()">Cancel</button>
+                </div>
+            </div>
+        </div>
+        <button class="modal-close is-large" onclick="closeDeleteModal()"></button>
+    </div>
+
+
+<!-- ------------------------------------------------------------------------ -->
+
+
+<!-- Form Modal (For both Add and Edit) -->
+<div class="modal  is-fullscreen" id="formModal_sub">
+    <div class="modal-background" onclick="closeFormModal_sub()"></div>
+    <div class="modal-card">
+        <header class="modal-card-head">
+            <p class="modal-card-title" id="formModalTitle_sub">Add/Edit Record_sub</p>
+            <button class="delete" aria-label="close" onclick="closeFormModal_sub()"></button>
+        </header>
+        <section class="modal-card-body">
+            <!-- Form Fields -->
+
+            <div class="field" id="div_formId_sub" style="display:none;">
+                <label class="label">comment_taskid</label>
+                <div class="control">
+                    <input class="input" type="text" id="formCommentTaskid_sub">
+                </div>
+            </div>
+
+            <div class="field" style="display:none;">
+                <label class="label">taskid</label>
+                <div class="control">
+                    <input class="input" type="text" id="formTaskid_sub">
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label">title</label>
+                <div class="control">
+                    <input class="input" type="text" id="formTitle_sub">
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label">detail</label>
+                <div class="control">
+                    <textarea id="formDetail_sub" class="textarea"></textarea>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label">Target Date</label>
+                <div class="control">
+                    <input class="input" type="date" id="formDate1_sub">
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label">date2</label>
+                <div class="control">
+                    <input class="input" type="date" id="formDate2_sub">
+                </div>
+            </div>
+            <div class="field">
+                <label class="label">date3</label>
+                <div class="control">
+                    <input class="input" type="date" id="formDate3_sub">
+                </div>
+            </div>
+
+
+            <div class="field">
+                <label class="label">date4</label>
+                <div class="control">
+                    <input class="input" type="date" id="formDate4_sub">
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label">date5</label>
+                <div class="control">
+                    <input class="input" type="date" id="formDate5_sub">
+                </div>
+            </div>
+
+
+
+            <div class="field" style="display:none;">
+                <label class="label">create date</label>
+                <div class="control">
+                    <input class="input" type="text" id="formCreateDate_sub">
+                </div>
+            </div>
+
+        </section>
+        <footer class="modal-card-foot">
+            <button class="button is-success" id="formModalActionBtn_sub" onclick="submitForm_sub()"><i class="fa-solid fa-check"></i>&nbsp;Save</button>
+            <button class="button" onclick="closeFormModal_sub()"><i class="fa-solid fa-xmark"></i>&nbsp;Cancel</button>
+        </footer>
+    </div>
+</div>
+
+
+
+<!-- ------------------------------------------------------------------------ -->
+
+<!-- Form Modal (For both Add and Edit) -->
+<div class="modal is-fullscreen" id="formModal_task_permission">
+    <div class="modal-background" onclick="closeFormModal_task_permission()"></div>
+    <div class="modal-card">
+        <header class="modal-card-head">
+            <p class="modal-card-title" id="formModalTitle_task_permission">Add/Edit Record_task_permission</p>
+            <button class="delete" aria-label="close" onclick="closeFormModal_task_permission()"></button>
+        </header>
+        <section class="modal-card-body">
+            <!-- Form Fields -->
+
+            <div class="field" style="display:none;">
+                <label class="label">accessrole_id</label>
+                <div class="control">
+                    <input class="input" type="text" id="formAccessroleId_task_permission">
+                </div>
+            </div>
+
+            <div class="field" style="display:none;">
+                <label class="label">taskid</label>
+                <div class="control">
+                    <input class="input" type="text" id="formTaskid_task_permission">
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label">emplid</label>
+                <div class="control">
+                    <input class="input" type="text" id="formEmplid_task_permission">
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label">name</label>
+                <div class="control">
+                    <input class="input" type="text" id="formName_task_permission" disabled>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label">rc_code</label>
+                <div class="control">
+                    <input class="input" type="text" id="formRcCode_task_permission" disabled>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label">rc_name</label>
+                <div class="control">
+                    <input class="input" type="text" id="formRcName_task_permission" disabled>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label">branch</label>
+                <div class="control">
+                    <input class="input" type="text" id="formBranch_task_permission" disabled>
+                </div>
+            </div>
+
+            <div class="field" style="display:none;">
+                <label class="label">Assign Date Time</label>
+                <div class="control">
+                    <input class="input" type="datetime-local" id="formAssignDateTime_task_permission">
+                </div>
+            </div>
+            
+        </section>
+        <footer class="modal-card-foot">
+            <button class="button is-success" id="formModalActionBtn_task_permission" onclick="submitForm_task_permission()"><i class="fa-solid fa-check"></i>&nbsp;Save</button>
+            <button class="button" onclick="closeFormModal_task_permission()"><i class="fa-solid fa-xmark"></i>&nbsp;Cancel</button>
+        </footer>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+    <!-- Comment Delete Confirmation Modal -->
+    <div class="modal" id="deleteModal_sub">
+        <div class="modal-background" onclick="closeDeleteModal_sub()"></div>
+        <div class="modal-content">
+            <div class="box">
+                <h1 class="title">Confirm Delete comment</h1>
+                <p>Are you sure you want to delete this comment?</p>
+                <div class="buttons">
+                    <button class="button is-danger" onclick="confirmDelete_sub()">Yes, Delete</button>
+                    <button class="button" onclick="closeDeleteModal_sub()">Cancel</button>
+                </div>
+            </div>
+        </div>
+        <button class="modal-close is-large" onclick="closeDeleteModal_sub()"></button>
+    </div>
+
+
+
+
+
+
+    <!-- Comment Delete Confirmation Modal -->
+    <div class="modal" id="deleteModal_task_permission">
+        <div class="modal-background" onclick="closeDeleteModal_task_permission()"></div>
+        <div class="modal-content">
+            <div class="box">
+                <h1 class="title">Confirm Delete Task Permission</h1>
+                <p>Are you sure you want to delete this task_permission?</p>
+                <div class="buttons">
+                    <button class="button is-danger" onclick="confirmDelete_task_permission()">Yes, Delete</button>
+                    <button class="button" onclick="closeDeleteModal_task_permission()">Cancel</button>
+                </div>
+            </div>
+        </div>
+        <button class="modal-close is-large" onclick="closeDeleteModal_task_permission()"></button>
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+        </div>
+
+
+
+
+
+
+
+
+
+    <script>
+    const taskId = <?= id ?>;
+
+
+
+function navigateToIndex() {
+    reLoad('index');
+}
+
+function reLoad(page, id) {
+    google.script.run
+        .withSuccessHandler(function(url) {
+            if (id) {
+                url += `?page=${page}&id=${id}`;
+            } else {
+                url += `?page=${page}`;
+            }
+            window.open(url, '_top');
+        })
+        .getScriptURL();
+}
+
+
+console.log(getParameterByName('id'));  // จะทำการแสดงค่า id ที่ได้จาก URL ใน console
+
+function fetchTaskData() {
+    // ดึง id จาก URL
+
+
+    // ดึงข้อมูล task จาก Google Sheets
+    google.script.run
+        .withSuccessHandler(displayTaskData)
+        .getTaskDataFromSheetById(taskId);
+}
+
+
+function fetchTaskData_task_permission() {
+    // google.script.run
+    //     .withSuccessHandler(displayTaskData_task_permission)
+    //     .getTaskDataFromSheetById_task_permission(taskId);
+}
+
+
+
+
+
+function getParameterByName(name, url = google.script.url.getLocation()) {
+    name = name.replace(/[\[\]]/g, '\\$&');
+    const regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)');
+    const results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, ' '));
+}
+
+
+
+
+
+
+
+
+
+function displayTaskData(taskData) {
+    // กำหนดค่าฟิลด์ในหน้าเว็บ
+    $('#taskId').text(taskData.id);
+    $('#taskName').text(taskData.task);
+    $('#taskDetail').text(taskData.detail);
+    $('#url1').text(taskData.url1);
+    $('#url2').text(taskData.url2);
+    $('#owner').text(taskData.owner);
+    $('#user').text(taskData.user);
+    $('#targetDate').text(taskData.targetDate);
+    $('#createdUpdate').text(taskData.createdUpdate);
+    $('#lastUpdate').text(taskData.lastUpdate);
+    $('#whoLogin').text(taskData.whoLogin);
+    $('#status').text(taskData.status);
+    
+    // กำหนดค่าฟิลด์ใน Modal
+    $('#formId').val(taskData.id);
+    $('#formTask').val(taskData.task);
+    $('#formDetail').val(taskData.detail);
+    $('#formUrl1').val(taskData.url1);
+    $('#formUrl2').val(taskData.url2);
+    $('#formWho_create').val(taskData.owner);
+    $('#formWho_use').val(taskData.user);
+    $('#formTargetDate').val(taskData.targetDate);
+    $('#formCreate_date').val(taskData.createdUpdate);
+    $('#formLastUpdate').val(taskData.lastUpdate);
+    $('#formWhoLogin').val(taskData.whoLogin);
+
+    // กำหนดค่าให้ radio buttons
+    $("input[name='status'][value='" + taskData.status + "']").prop('checked', true);
+}
+
+
+
+
+
+
+// เรียกฟังก์ชัน fetchTaskData เมื่อหน้าเว็บโหลดเสร็จ
+window.onload = fetchTaskData;
+
+
+
+
+
+
+
+        let isEditing = false; // Flag to determine add vs edit
+
+
+
+
+
+        function submitForm() {
+
+            let data = {
+                id: isEditing ? $("#formId").val() : generateId(),
+                task: $("#formTask").val(),
+                detail: $("#formDetail").val(),
+                url1: $("#formUrl1").val(),
+                url2: $("#formUrl2").val(),
+                who_create: $("#formWho_create").val(),
+                who_use: $("#formWho_use").val(),
+                target_date: $("#formTargetDate").val(),
+                create_update: $("#formCreate_date").val(),
+                last_update: '',
+                status: $("input[name='status']:checked").val()  // ค่าของ radio button ที่ถูกเลือก
+            };
+            if (isEditing) {
+                google.script.run.withSuccessHandler(fetchSheetData).editRow_sub(data);
+                
+            } 
+            closeFormModal();
+        }
+
+
+
+
+
+            // $('#formCommentTaskid_sub').val(data_sub[0]);
+            // $('#formTaskid_sub').val(data_sub[1]);
+
+            // $('#formTitle_sub').val(data_sub[2]);
+            // $('#formDetail_sub').val(data_sub[3]);
+            // $('#formDate1_sub').val(data_sub[4]);
+            // $('#formDate2_sub').val(data_sub[5]);
+            // $('#formDate3_sub').val(data_sub[6]);
+            // $('#formDate4_sub').val(data_sub[7]);
+            // $('#formDate5_sub').val(data_sub[8]);   
+
+
+
+
+        function submitForm_sub() {
+            let data = {
+                comment_taskid: isEditing ? $("#formCommentTaskid_sub").val() : generateId_sub(),
+                taskid: $("#taskId").text(),  // ใช้ค่าจาก <span id="taskId">
+                title: $("#formTitle_sub").val(),
+                detail: $("#formDetail_sub").val(),
+                date1: $("#formDate1_sub").val(),
+                date2: $("#formDate2_sub").val(),
+                date3: $("#formDate3_sub").val(),
+                date4: $("#formDate4_sub").val(),
+                date5: $("#formDate5_sub").val(),
+            };
+
+            console.log('isEditing ', isEditing)
+            if (isEditing) {
+                console.log('submitForm_sub เข้าเงื่อนไข isEditing')
+                google.script.run.withSuccessHandler(fetchSheetData).editRow_sub(data);
+            } else {
+               google.script.run.withSuccessHandler(fetchSheetData).addRow_sub(data);
+            }
+            closeFormModal_sub();
+        }
+
+
+
+
+ 
+
+
+
+
+        function submitForm_task_permission() {
+            let data = {
+                accessrole_id: isEditing ? $("#formAccessroleId_task_permission").val() : generateId_task_permission(),
+                taskid: $("#taskId").text(),  // ใช้ค่าจาก <span id="taskId">
+                emplid: $("#formEmplid_task_permission").val(),
+                name: $("#formName_task_permission").val(),
+                rc_code: $("#formRcCode_task_permission").val(),
+                rc_name: $("#formRcName_task_permission").val(),
+                branch: $("#formBranch_task_permission").val(),
+                assignDateTime: $("#formAssignDateTime_task_permission").val()
+
+
+            };
+
+
+            google.script.run.withSuccessHandler(fetchSheetData_task_permission).addRow_task_permission(data);
+            closeFormModal_task_permission();
+        }
+
+
+
+
+
+
+//copy มาจาก index.html
+
+        function prepareEditModal(btn) {
+            isEditing = true;
+
+                // เปิด Modal แก้ไข
+                const modal = document.getElementById('formModal');
+                modal.classList.add('is-active');
+
+
+                
+                // $('#formModal').addClass('is-active');
+                $('#div_formId').css('display', 'block');
+                $('#formId').prop('disabled', true);
+        }
+
+
+
+        function prepareEditModal_sub(btn) {
+            // alert('1')
+
+            const data_sub = $('#dataTable_sub').DataTable().row($(btn).parents('tr')).data();
+            openEditModal_sub(data_sub);
+
+
+
+            // isEditing = true;
+
+            //     // เปิด Modal แก้ไข
+            //     const modal = document.getElementById('formModal_sub');
+            //     modal.classList.add('is-active');
+
+
+                
+            //     // $('#formModal').addClass('is-active');
+            //     $('#div_formId_sub').css('display', 'block');
+            //     $('#formId_sub').prop('disabled', true);
+        } // end function
+
+
+        function openEditModal_sub(data_sub) {
+            $('#formModalTitle_sub').text('Edit Record');
+
+            $('#formModalActionBtn_sub').html('<i class="fa-solid fa-check"></i>&nbsp;Edit');
+
+            // $('#formModalActionBtn_sub').text('Edit');
+
+
+            $('#formCommentTaskid_sub').val(data_sub[0]);
+            $('#formTaskid_sub').val(data_sub[1]);
+
+            $('#formTitle_sub').val(data_sub[2]);
+            $('#formDetail_sub').val(data_sub[3]);
+            $('#formDate1_sub').val(data_sub[4]);
+            $('#formDate2_sub').val(data_sub[5]);
+            $('#formDate3_sub').val(data_sub[6]);
+            $('#formDate4_sub').val(data_sub[7]);
+            $('#formDate5_sub').val(data_sub[8]);   
+
+            isEditing = true;
+
+            $('#formModal_sub').addClass('is-active');
+            $('#div_formId_sub').css('display', 'block');
+            $('#formCommentTaskid_sub').prop('disabled', true);
+        }
+
+
+
+        function closeFormModal_sub() {
+            $('#formModal_sub').removeClass('is-active');
+        }
+
+
+
+
+        function closeFormModal() {
+            $('#formModal').removeClass('is-active');
+        }
+
+
+
+        function fetchSheetData() {
+            console.log('success')
+            fetchTaskData();
+        }
+
+
+
+        function fetchSheetData_task_permission() {
+            console.log('success')
+            fetchTaskData_task_permission();
+        }
+
+
+
+        //---------------------------
+        function deleteRecord() {
+            // const data = $('#dataTable').DataTable().row($(btn).parents('tr')).data();
+            google.script.run.withSuccessHandler(fetchSheetData).deleteRow(taskId);
+        }
+
+
+        function deleteRecord_sub(btn) {
+
+
+            const data = $('#dataTable_sub').DataTable().row($(btn).parents('tr')).data();
+            console.log('data')
+            console.log(data)
+            google.script.run.withSuccessHandler(fetchSheetData).deleteRow_sub(data[0]);
+        }
+
+
+
+        function deleteRecord_task_permission(btn) {
+            const data = $('#dataTable_task_permission').DataTable().row($(btn).parents('tr')).data();
+            google.script.run.withSuccessHandler(fetchSheetData_task_permission).deleteRow_task_permission(data[0]);
+        }
+
+
+
+        let deleteButtonElement;
+
+        function showDeleteModal(buttonElement) {
+            deleteButtonElement = buttonElement;
+            document.getElementById('deleteModal').classList.add('is-active');
+        }
+        
+
+
+
+   
+
+        //---------------------------
+
+
+
+
+
+
+
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.remove('is-active');
+        }
+
+
+        function closeDeleteModal_sub() {
+            document.getElementById('deleteModal_sub').classList.remove('is-active');
+        }
+
+        function closeDeleteModal_task_permission() {
+            document.getElementById('deleteModal_task_permission').classList.remove('is-active');
+        }
+
+
+
+
+        function confirmDelete() {
+            // deleteRecord(deleteButtonElement);
+            deleteRecord();
+            closeDeleteModal();
+
+
+            setTimeout(() => {
+                navigateToIndex();
+            }, 3000); // 3,000 มิลลิวินาที = 3 วินาที
+        }
+        //---------------------------
+
+
+
+
+
+        let deleteButtonElement_sub;
+
+        let deleteButtonElement_task_permission;
+
+        function showDeleteModal_sub(buttonElement) {
+            deleteButtonElement_sub = buttonElement;
+            document.getElementById('deleteModal_sub').classList.add('is-active');
+        }
+
+
+        function showDeleteModal_task_permission(buttonElement) {
+            deleteButtonElement_task_permission = buttonElement;
+            document.getElementById('deleteModal_task_permission').classList.add('is-active');
+        }
+
+
+
+
+        function confirmDelete_sub() {
+            deleteRecord_sub(deleteButtonElement_sub);
+            closeDeleteModal_sub();
+        } // end function
+
+
+
+        function confirmDelete_task_permission() {
+            deleteRecord_task_permission(deleteButtonElement_task_permission);
+            closeDeleteModal_task_permission();
+        } // end function
+
+
+
+
+
+
+
+
+
+
+      function setupAutocomplete1(data) {
+        $("#formWho_create, #formWho_use").autocomplete({
+          source: data.map(function(row) {
+            return {
+              label: row[1] + ' (' + row[0] + ')',  // "ชื่อ - สกุล (ID)"
+              value: row[0]  // "ID"
+            };
+          }),
+          minLength: 3,  // กำหนดให้แสดง autocomplete เมื่อพิมพ์ตั้งแต่ 3 ตัวอักษรขึ้นไป
+          select: function(event, ui) {
+            event.preventDefault();
+            this.value = ui.item.value;
+          }
+        });
+      }
+
+
+
+
+      // ดึงข้อมูลจาก Google Apps Script และตั้งค่า Autocomplete
+      google.script.run.withSuccessHandler(setupAutocomplete1).getStaffData();
+
+
+
+
+
+
+
+        function navigateToDetail_sub(btn) {
+            const data_sub = $('#dataTable_sub').DataTable().row($(btn).parents('tr')).data();
+            console.log(data_sub[0])
+            reLoad('sub', data_sub[0]);
+        }
+
+
+
+
+
+        function renderTable_sub(data) {
+            console.log('data')
+            console.log(data)
+            $('#dataTable_sub').DataTable().destroy();
+            $('#dataTable_sub').DataTable({
+
+              
+                data: data.slice(0),
+                columns: [
+                    { data: 0 },
+                    { data: 1 },
+                    { data: 2 },
+                    { data: 3 },
+                    { data: 4 },
+                    { data: 5 },
+                    { data: 6 },
+                    { data: 7 },
+                    { data: 8 },
+                    { data: 9 },
+
+                    {
+                        data: null,
+                        defaultContent: '\
+                        <button class="button is-small is-link" onclick="prepareEditModal_sub(this);"><i class="fas fa-edit"></i></button>\
+                        <button class="button is-small is-danger" onclick="showDeleteModal_sub(this);"><i class="fas fa-trash-alt"></i></button>\
+                        <button class="button is-small is-success" onclick="navigateToDetail_sub(this);"><i class="fa-solid fa-eye"></i></button>'
+                    }
+                ],
+
+                // order: [[10, 'desc']], //sort create date
+                columnDefs: [
+                 {
+                      targets: [0,1,5,6,7,8,9],  // Target column index
+                      visible: false
+                  },
+                ]
+                             
+
+
+            });
+        }
+
+
+
+
+
+
+
+        function renderTable_task_permission(data) {
+
+
+          console.log('render task')
+          console.log(data)
+            $('#dataTable_task_permission').DataTable().destroy();
+            $('#dataTable_task_permission').DataTable({
+              
+              
+              
+                data: data.slice(0),
+                columns: [
+                    { data: 0 },
+                    { data: 1 },
+                    { data: 2 },
+                    { data: 3 },
+                    { data: 4 },
+                    { data: 5 },
+                    { data: 6 },
+                    { data: 7 },
+                    {
+                        data: null,
+                        defaultContent: '\
+                        <button class="button is-small is-danger" onclick="showDeleteModal_task_permission(this);"><i class="fas fa-trash-alt"></i></button>'
+                    }
+                ],
+                  columnDefs: [
+                 {
+                      targets: [0,1,7],  // Target column index
+                      visible: false
+                  },
+                ]
+
+
+            });
+        }
+
+
+
+        function fetchSheetData() {
+            showSpinner();
+            console.log('taskId')
+            console.log(taskId)
+            google.script.run.withSuccessHandler(function(data){
+                renderTable_sub(data);
+                hideSpinner();
+            }).getSheetData_sub(taskId);
+        }
+
+
+        function fetchSheetData_task_permission() {
+            console.log('ส่งไปเทสง')
+            console.log(taskId)
+            showSpinner();
+            google.script.run.withSuccessHandler(function(data){
+                renderTable_task_permission(data);
+                hideSpinner();
+            }).getSheetData_task_permission(taskId);
+        }
+
+
+
+
+
+
+
+        function showSpinner() {
+            // alert('test1');
+            $("#spinner").show();
+        }
+
+        function hideSpinner() {
+            // alert('test2');
+            $("#spinner").hide();
+        }
+
+
+
+        $(document).ready(function () {
+            fetchSheetData();
+            fetchSheetData_task_permission();
+        });
+
+
+
+
+        function openAddModal_sub() {
+            $('#formModalTitle_sub').text('Add New Sub Task');
+            // $('#formModalActionBtn_sub').text('Add');
+            $('#formModalActionBtn_sub').html('<i class="fa-solid fa-check"></i>&nbsp;Add');
+
+
+
+            clearForm_sub();
+            isEditing = false;
+            $('#formModal_sub').addClass('is-active');
+            $('#formId_sub').prop('disabled', false);
+            $('#div_formId_sub').css('display', 'none');
+        }
+
+
+        function openAddModal_task_permission() {
+            $('#formModalTitle_task_permission').text('Add New Task Permission');
+            // $('#formModalActionBtn_sub').text('Add');
+            $('#formModalActionBtn_task_permission').html('<i class="fa-solid fa-check"></i>&nbsp;Add');
+
+            clearForm_task_permission();
+            isEditing = false;
+            $('#formModal_task_permission').addClass('is-active');
+            $('#formId_task_permission').prop('disabled', false);
+            $('#div_formId_task_permission').css('display', 'none');
+
+
+            //clear ค่าว่าง
+            $("#formEmplid_task_permission").val('');
+            $("#formName_task_permission").val('');
+            $("#formRcCode_task_permission").val('');
+            $("#formRcName_task_permission").val('');
+            $("#formBranch_task_permission").val('');
+        }
+
+
+
+        function clearForm_sub() {
+            $('#formCommentTaskid_sub').val('');
+            $('#formTaskid_sub').val('');
+
+            $('#formTitle_sub').val('');
+            $('#formDetail_sub').val('');
+            $('#formDate1_sub').val('');
+            $('#formDate2_sub').val('');
+            $('#formDate3_sub').val('');
+            $('#formDate4_sub').val('');
+            $('#formDate5_sub').val('');   
+        } // end function
+
+
+        function clearForm_task_permission() {
+            $('#formCommentTaskid_sub').val('');
+            $('#formTaskid_sub').val('');
+
+            $('#formTitle_sub').val('');
+            $('#formDetail_sub').val('');
+            $('#formDate1_sub').val('');
+            $('#formDate2_sub').val('');
+            $('#formDate3_sub').val('');
+            $('#formDate4_sub').val('');
+            $('#formDate5_sub').val('');   
+        } // end function
+
+
+        
+
+        function closeFormModal_sub() {
+            $('#formModal_sub').removeClass('is-active');
+        }
+
+
+
+        function closeFormModal_task_permission() {
+            $('#formModal_task_permission').removeClass('is-active');
+        }
+
+
+
+        // function generateId_sub() {
+        //     const currentDate = new Date();
+        //     const formattedDate = currentDate.toISOString().split('T')[0];
+        //     const timestamp = Date.now();
+        //     return `sub_${formattedDate}_${timestamp}`;
+        // }
+        
+        function generateId_sub() {
+            const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                var r = Math.random() * 16 | 0,
+                    v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+            return 'sub_' + uuid;
+        }
+
+
+        function generateId_task_permission() {
+            const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                var r = Math.random() * 16 | 0,
+                    v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+            return 'task_permission_' + uuid;
+        }
+
+
+function setupAutocomplete2(data) {
+    console.log('return data staff')
+    console.log(data)
+    $("#formEmplid_task_permission").autocomplete({
+        source: data.map(function(row) {
+            return {
+                label: row[1] + ' (' + row[0] + ')',  // "ชื่อ - สกุล (ID)"
+                value: row[0],  // "ID"
+                data: row  // แนบข้อมูล row ทั้งหมดกับ item ใน autocomplete
+            };
+        }),
+        minLength: 3,
+        select: function(event, ui) {
+            event.preventDefault();
+            this.value = ui.item.value;
+
+            // ใช้ข้อมูลที่แนบไว้กับ item ใน autocomplete
+            var selectedItemData = ui.item.data;
+            $("#formName_task_permission").val(selectedItemData[1]);
+            $("#formRcCode_task_permission").val(selectedItemData[4]);
+            $("#formRcName_task_permission").val(selectedItemData[3]);
+            $("#formBranch_task_permission").val(selectedItemData[5]);
+        }
+    });
+}
+
+    // ดึงข้อมูลจาก Google Apps Script และตั้งค่า Autocomplete
+    google.script.run.withSuccessHandler(setupAutocomplete2).getStaffData();
+
+
+
+
+
+
+
+
+$(document).ready(function() {
+    $("#formEmplid_task_permission").on("input", function() {
+        // ตรวจสอบว่าค่าใน input field นี้เป็นค่าว่างหรือไม่
+        if (!$(this).val()) {
+            // ถ้าเป็นค่าว่าง, ให้เคลียค่าของ input fields อื่นๆ
+            $("#formName_task_permission").val('');
+            $("#formRcCode_task_permission").val('');
+            $("#formRcName_task_permission").val('');
+            $("#formBranch_task_permission").val('');
+        }
+    });
+});
+
+
+    </script>
+
+    
+</body>
+</html>
+
